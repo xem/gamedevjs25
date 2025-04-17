@@ -1,0 +1,142 @@
+<!doctype html>
+<meta charset=utf-8>
+<body id=b>
+<canvas id=a width=640 height=640>
+<script>
+d = document;
+g = a.getContext('webgl');
+
+
+up = down = left = right = 0, backward = 1, forward = 0;
+
+shader = `
+// Mandelbox distance function
+float map(vec3 pos) {
+    vec4 p = vec4(pos,1);
+    vec4 p0 = p;
+    for (int i = 0; i < 35; i++) {
+        p.xyz = clamp(p.xyz, -1., 1.) * 2. - p.xyz;
+        float r2 = dot(p.xyz, p.xyz);
+        p *= clamp(max(.25 / r2, .25), 0., 1.);
+        p = p * (vec4(2.8, 2.8, 2.8, abs(2.8)) / .25) + p0;
+    }
+    return (length(p.xyz) - 1.) / p.w - pow(abs(2.8), -9.);
+}
+
+vec3 n(vec3 p) {
+	vec2 e = vec2(.0001, 0);
+	return normalize(vec3(
+		map(p - e.xyy) - map(p + e.xyy),
+		map(p - e.yxy) - map(p + e.yxy),
+		map(p - e.yyx) - map(p + e.yyx)
+	));
+}
+
+// Ray marcher
+void mainImage(out vec4 o,vec2 c){
+  
+  // Adjust coordinates system
+  vec2 uv = c / iResolution.xx - iResolution.xy / iResolution.xx / 2.;
+  vec3 rd = normalize(vec3(uv, 1.));
+
+  // Starting point for the ray (eye position)
+  vec3 p = vec3(iCam.x, iCam.y, -15. + iCam.z);
+  
+  // Iterations
+  const float it = 2999.;
+  
+  // Default color (orange)
+  vec3 col = vec3(.7+(gl_FragCoord.y-600.)/10000.,.35+(gl_FragCoord.y-600.)/10000.,0);
+  
+  // Iterate for each pixel
+  for (float i = .0; i < it; i++){
+    
+    // Compute remaining distance from ray to Mandelbox 
+    float dist = map(p);
+    
+    // Choose a distance where the ray is close enough
+    if (dist < min(.01, max(1. / ((iCam.z) * 100.), .0001))){
+      
+      // Set color according to the number of iterations
+      col = vec3(dot(n(p), vec3(0,0,1)));
+
+      // Stop
+      break;
+    }
+
+    // If ray is not close enough: advance the ray according to the remaining distance
+    p += rd * dist;
+	
+	if (p.z > 5.) break;
+  }
+
+  // Color the pixel
+  
+  o.rgb = col;
+  if (gl_FragCoord.x < 1. && gl_FragCoord.y < 1.) {
+	o.r = map(iCam.xyz - vec3(0,0,15));
+  }
+}`
+
+{
+  (
+    e => {
+      h = g.FRAGMENT_SHADER,
+      g.vertexAttribPointer(
+        p = g.createProgram(
+          i = e => {
+            g.shaderSource(
+              s = g.createShader(h++),
+              e
+            );
+            g.compileShader(s);
+            g.attachShader(p, s);
+            return 1;
+          }
+        ),
+        2,
+        5120,
+        g.bufferData(
+          n = g.ELEMENT_ARRAY_BUFFER_BINDING - 3,
+          Int8Array.of(
+            i(
+              `precision mediump float;uniform vec2 iResolution;uniform vec4 iCam;\n`
+              + shader
+              + `void main(){mainImage(gl_FragColor,gl_FragCoord.xy);gl_FragColor.w=1.;}`
+            ),
+            n,
+            !g.enableVertexAttribArray(
+              g.bindBuffer(
+                n,
+                g.createBuffer(
+                  m = [-0.4400540540540543, 0.11305105105105107, 19.5]
+                )
+              )
+            ),
+            i`attribute vec4 p;void main(){gl_Position=p;}`
+          ),
+          n + 82
+        ),
+        !g.linkProgram(p),
+        g.useProgram(p)
+      )
+    }
+  )(),
+  
+  (l = e => {
+      g.uniform4f(g.getUniformLocation(p, `iCam`), m[0], m[1], m[2], m[3])
+      g.uniform2f(g.getUniformLocation(p, `iResolution`), a.width, a.height)
+      g.drawArrays(6,0,3)
+      k=new Uint8Array(4)
+      g.readPixels(0,0,1,1,g.RGBA,g.UNSIGNED_BYTE,k)
+      d = .02
+      if(backward && m[2]>15.8) m[2] -= d/5; 
+      else if(backward && m[2]>10) m[2] -= d/2; 
+      else if(backward && m[2]>.5) m[2] -= d*2; 
+	  
+      requestAnimationFrame(l)
+	  
+  })()
+}
+
+</script>

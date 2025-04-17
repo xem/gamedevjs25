@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phaser 3 Falling Cubes</title>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
+</head>
+<body>
+  <script>
+    const config = {
+    type: Phaser.AUTO,
+    width: 800, // Set canvas width to 400px
+    height: 800, // Set canvas height to 800px
+    backgroundColor: 0xddeeff, // Set background color to white
+    physics: {
+      default: 'matter',
+      matter: {
+        debug: false,
+      },
+    },
+    scene: {
+      preload: preload,
+      create: create,
+      update: update,
+    },
+  };
+
+    const game = new Phaser.Game(config);
+
+    let platform, platform2, platform3, platform4, platform5; // Declare all platforms globally
+  
+    let cursors;
+    let objectCounter = 0; // Declare objectCounter as a global variable
+    let counterText; // Text field to display the current falling item's number
+    let lostText; // Text to display "lost" message
+    let lost = 0;
+
+    function preload() {
+      this.load.image('cube', 'https://via.placeholder.com/50/FF0000/FFFFFF?text=+');
+    }
+
+    function create() {
+     // Create the text field at the top of the screen
+     counterText = this.add.text(10, 10, '0', {
+      font: '20px Arial',
+      fill: '#000000',
+    });
+    
+    // Create the platform as a visible rectangle and link it to a physics body
+    platform = this.add.rectangle(400, 750, 320, 20, 0xff0000); // Visible red rectangle
+    this.matter.add.gameObject(platform, {
+      isStatic: true,
+      friction: .5, // High friction to simulate dragging cubes
+    });
+
+    platform2 = this.add.rectangle(200, 725, 20, 100, 0xff0000); // Visible red rectangle
+    this.matter.add.gameObject(platform2, {
+      angle: -45,
+      isStatic: true,
+      friction: .5, // High friction to simulate dragging cubes
+    });
+
+    platform3 = this.add.rectangle(600, 725, 20, 100, 0xff0000); // Visible red rectangle
+    this.matter.add.gameObject(platform3, {
+      angle: 45,
+      isStatic: true,
+      friction: .5, // High friction to simulate dragging cubes
+    });
+
+    platform4 = this.add.rectangle(165, 650, 20, 100, 0xff0000); // Visible red rectangle
+    this.matter.add.gameObject(platform4, {
+      isStatic: true,
+      friction: 1, // High friction to simulate dragging cubes
+    });
+
+    platform5 = this.add.rectangle(635, 650, 20, 100, 0xff0000); // Visible red rectangle
+    this.matter.add.gameObject(platform5, {
+      isStatic: true,
+      friction: 1, // High friction to simulate dragging cubes
+    });
+
+    // Add input for arrow keys
+    cursors = this.input.keyboard.createCursorKeys();
+
+    // Spawn cubes every second
+    this.time.addEvent({
+      delay: 2000,
+      callback: () => {
+        if(lost == 1) {
+          return;
+        } 
+        
+
+  // Inside the callback function for spawning objects
+  const x = Phaser.Math.Between(50, 750);
+  objectCounter++; // Increment the counter
+  counterText.setText(`${objectCounter}`); // Update the text field
+
+  if (objectCounter % 5 === 0) {
+    // Create a blue circle every fifth object
+    const circle = this.matter.add.circle(x, 0, 25, {
+      friction: 1, // High friction for circles
+      frictionAir: 0.02, // Slight air resistance for realism
+      restitution: 0.9, // Bounce effect
+    });
+
+    // Check if the shape falls below the canvas
+    this.matter.world.on('beforeupdate', () => {
+          if (circle.position.y > 800) {
+            this.matter.world.pause(); // Stop the physics simulation
+            lostText = this.add.text(200, 400, 'Lost', {
+              font: '40px Arial',
+              fill: '#ff0000',
+            }).setOrigin(0.5); // Center the "lost" text
+          }
+        });
+
+    // Add a visual representation of the circle
+    const graphics = this.add.graphics();
+    graphics.fillStyle(0x0000ff, 1); // Blue color
+    graphics.fillCircle(0, 0, 25); // Draw circle centered at (0, 0)
+    graphics.setPosition(circle.position.x, circle.position.y);
+    circle.graphics = graphics;
+
+    // Update the circle's visual position in the update loop
+    this.matter.world.on('beforeupdate', () => {
+      graphics.setPosition(circle.position.x, circle.position.y);
+    });
+  } else {
+    // Create a green rectangle (twice as long)
+    const rectangle = this.matter.add.rectangle(x, 0, 150, 20, {
+      angle: Phaser.Math.DegToRad(Phaser.Math.Between(0, 360)), // Random angle
+      friction: 1, // High friction for rectangles
+      frictionAir: 0.02, // Slight air resistance for realism
+      restitution: 0.1, // Bounce effect
+    });
+
+    
+// Check if the shape falls below the canvas
+this.matter.world.on('beforeupdate', () => {
+          if (rectangle.position.y > 800) {
+            this.matter.world.pause(); // Stop the physics simulation
+            lost = 1;
+            lostText = this.add.text(400, 400, 'LOST', {
+              font: '40px Arial',
+              fill: '#ff0000',
+            }).setOrigin(0.5); // Center the "lost" text
+          }
+        });
+
+    // Add a visual representation of the rectangle
+    const graphics = this.add.graphics();
+    graphics.fillStyle(0x00ff00, 1); // Green color
+    graphics.fillRect(-100, -10, 200, 20); // Draw rectangle centered at (0, 0)
+    graphics.setPosition(rectangle.position.x, rectangle.position.y);
+    graphics.setRotation(rectangle.angle);
+    rectangle.graphics = graphics;
+
+    // Update the rectangle's visual position and rotation in the update loop
+    this.matter.world.on('beforeupdate', () => {
+      graphics.setPosition(rectangle.position.x, rectangle.position.y);
+      graphics.setRotation(rectangle.angle);
+    });
+  }
+
+  
+      },
+      loop: true,
+    });
+  }
+
+  function update() {
+    if (lost == 1) {return }
+
+    if (cursors.left.isDown) {
+      platform.setVelocityX(-5); // Move platform left
+      platform.x += -5; // Update the visual x position
+  
+      platform2.setVelocityX(-5); // Move platform left
+      platform2.x += -5;
+
+      platform3.setVelocityX(-5); // Move platform left
+      platform3.x += -5;
+
+      platform4.setVelocityX(-5); // Move platform left
+      platform4.x += -5;
+
+      platform5.setVelocityX(-5); // Move platform left
+      platform5.x += -5;
+    
+    } else if (cursors.right.isDown) {
+      platform.setVelocityX(5); // Move platform right
+      platform.x += 5; // Update the visual x position
+    
+      platform2.setVelocityX(5); // Move platform right
+      platform2.x += 5;
+
+      platform3.setVelocityX(5); // Move platform right
+      platform3.x += 5;
+
+      platform4.setVelocityX(5); // Move platform right
+      platform4.x += 5;
+
+      platform5.setVelocityX(5); // Move platform right
+      platform5.x += 5;
+
+    } else {
+      platform.setVelocityX(0); // Stop platform when no key is pressed
+      platform2.setVelocityX(0); // Stop platform when no key is pressed
+
+      platform3.setVelocityX(0); // Stop platform when no key is pressed
+      platform4.setVelocityX(0); // Stop platform when no key is pressed
+      platform5.setVelocityX(0); // Stop platform when no key is pressed
+
+    }
+  }
+  </script>
+</body>
+</html>

@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Phaser 3 Falling Cubes</title>
+  <title>H.Y.N.A.Y.M</title>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
+  <style>
+    body { cursor: pointer; background: #000; }
+  </style>
 </head>
 <body>
   <script>
@@ -25,7 +28,7 @@ let cursors;
 
     create() {
       // Add title text
-      this.add.text(400, 300, 'HOLD YOUR NOODLES\nAND YOUR MEATBALLS', {
+      this.add.text(400, 300, 'HOLD YOUR NOODLES...\nAND YOUR MEATBALLS', {
         font: '40px Arial',
         fill: '#ffffff',
         align: 'center',
@@ -128,6 +131,7 @@ let cursors;
     this.matter.world.on('beforeupdate', () => {
           if (circle.position.y > 800) {
             this.matter.world.pause(); // Stop the physics simulation
+            lost = 1;
             lostText = this.add.text(400, 400, 'LOST', {
               font: '40px Arial',
               fill: '#ff0000',
@@ -136,7 +140,7 @@ let cursors;
             // Add "Return to Title" button
             const returnButton = this.add.text(400, 600, 'RETURN TO TITLE', {
               font: '30px Arial',
-              fill: '#0000ff',
+              fill: '#ffffff',
             }).setOrigin(0.5).setInteractive();
 
             // Reload the page when the button is clicked
@@ -197,7 +201,7 @@ this.matter.world.on('beforeupdate', () => {
             // Add "Return to Title" button
             const returnButton = this.add.text(400, 600, 'RETURN TO TITLE', {
               font: '30px Arial',
-              fill: '#0000ff',
+              fill: '#ffffff',
             }).setOrigin(0.5).setInteractive();
 
             // Reload the page when the button is clicked

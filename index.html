@@ -26,22 +26,18 @@ let cursors;
       super({ key: 'TitleScene' });
     }
 
+    preload() {
+      this.load.image('cube', 'https://via.placeholder.com/50/FF0000/FFFFFF?text=+');
+      this.load.image('noodle', './noodle.png'); // Load the noodle image
+      this.load.image('title', './title.png'); // Load the title screen background image
+    }
+
     create() {
-      // Add title text
-      this.add.text(400, 300, 'HOLD YOUR NOODLES...\nAND YOUR MEATBALLS', {
-        font: '40px Arial',
-        fill: '#ffffff',
-        align: 'center',
-      }).setOrigin(0.5);
+      // Set the title screen background
+      this.add.image(400, 400, 'title').setOrigin(0.5); // Center the background image
 
-      // Add "Play" button
-      const playButton = this.add.text(400, 500, 'PLAY', {
-        font: '40px Arial',
-        fill: '#ff0000',
-      }).setOrigin(0.5).setInteractive();
-
-      // Start the game when the "Play" button is clicked
-      playButton.on('pointerdown', () => {
+      // Make clicking anywhere on the canvas start the game
+      this.input.on('pointerdown', () => {
         this.scene.start('GameScene');
       });
     }
@@ -56,7 +52,8 @@ let cursors;
 
 
     preload() {
-      this.load.image('cube', 'https://via.placeholder.com/50/FF0000/FFFFFF?text=+');
+      //this.load.image('cube', 'https://via.placeholder.com/50/FF0000/FFFFFF?text=+');
+      this.load.image('noodle', './noodle.png'); // Load the noodle image
     }
 
     create() {
@@ -76,27 +73,27 @@ let cursors;
       friction: .5, // High friction to simulate dragging cubes
     });
 
-    platform2 = this.add.rectangle(200, 725, 20, 100, 0xff0000); // Visible red rectangle
+    platform2 = this.add.rectangle(205, 725, 20, 100, 0xff0000); // Visible red rectangle
     this.matter.add.gameObject(platform2, {
       angle: -45,
       isStatic: true,
       friction: .5, // High friction to simulate dragging cubes
     });
 
-    platform3 = this.add.rectangle(600, 725, 20, 100, 0xff0000); // Visible red rectangle
+    platform3 = this.add.rectangle(595, 725, 20, 100, 0xff0000); // Visible red rectangle
     this.matter.add.gameObject(platform3, {
       angle: 45,
       isStatic: true,
       friction: .5, // High friction to simulate dragging cubes
     });
 
-    platform4 = this.add.rectangle(165, 650, 20, 100, 0xff0000); // Visible red rectangle
+    platform4 = this.add.rectangle(165, 655, 20, 100, 0xff0000); // Visible red rectangle
     this.matter.add.gameObject(platform4, {
       isStatic: true,
       friction: 1, // High friction to simulate dragging cubes
     });
 
-    platform5 = this.add.rectangle(635, 650, 20, 100, 0xff0000); // Visible red rectangle
+    platform5 = this.add.rectangle(635, 655, 20, 100, 0xff0000); // Visible red rectangle
     this.matter.add.gameObject(platform5, {
       isStatic: true,
       friction: 1, // High friction to simulate dragging cubes
@@ -122,7 +119,7 @@ let cursors;
   if (objectCounter % 5 === 0) {
     // Create a blue circle every fifth object
     const circle = this.matter.add.circle(x, 0, 25, {
-      friction: 1, // High friction for circles
+      friction: .5, // High friction for circles
       frictionAir: 0.02, // Slight air resistance for realism
       restitution: 0.9, // Bounce effect
     });
@@ -138,7 +135,7 @@ let cursors;
             }).setOrigin(0.5); // Center the "lost" text
           
             // Add "Return to Title" button
-            const returnButton = this.add.text(400, 600, 'RETURN TO TITLE', {
+            const returnButton = this.add.text(400, 450, 'RETURN TO TITLE', {
               font: '30px Arial',
               fill: '#ffffff',
             }).setOrigin(0.5).setInteractive();
@@ -164,54 +161,39 @@ let cursors;
       graphics.setPosition(circle.position.x, circle.position.y);
     });
   } else {
-    // Create a rectangle 
-    const rectangle = this.matter.add.rectangle(x, 0, 200, 10, {
+    // Create a rectangle with noodle appearance
+    const rectangle = this.matter.add.image(x, -200, 'noodle', null, { // Spawn 200px higher
       angle: Phaser.Math.DegToRad(Phaser.Math.Between(0, 360)), // Random angle
       friction: 1, // High friction for rectangles
       frictionAir: 0.02, // Slight air resistance for realism
       restitution: 0.1, // Bounce effect
     });
 
-    // Add a visual representation of the rectangle
-  const graphics2 = this.add.graphics();
-  graphics2.fillStyle(0xF4FF93, 1); // Light yellow-green color for the rectangle
-  graphics2.fillRect(-100, -5, 200, 10); // Draw rectangle centered at (0, 0)
-  graphics2.setPosition(rectangle.position.x, rectangle.position.y);
-  graphics2.setRotation(rectangle.angle);
-  rectangle.graphics = graphics2;
+    rectangle.setScale(0.8); // Scale the noodle image to match the rectangle's dimensions
+    rectangle.setOrigin(0.5); // Center the image
 
-  // Update the rectangle's visual position and rotation in the update loop
-  this.matter.world.on('beforeupdate', () => {
-    graphics2.setPosition(rectangle.position.x, rectangle.position.y);
-    graphics2.setRotation(rectangle.angle);
-  });
+    // Check if the rectangle falls below the canvas
+    this.matter.world.on('beforeupdate', () => {
+      if (rectangle.y > 800) {
+        this.matter.world.pause(); // Stop the physics simulation
+        lost = 1;
+        lostText = this.add.text(400, 400, 'LOST', {
+          font: '40px Arial',
+          fill: '#ff0000',
+        }).setOrigin(0.5); // Center the "lost" text
 
+        // Add "Return to Title" button
+        const returnButton = this.add.text(400, 450, 'RETURN TO TITLE', {
+          font: '30px Arial',
+          fill: '#ffffff',
+        }).setOrigin(0.5).setInteractive();
 
-    
-// Check if the shape falls below the canvas
-this.matter.world.on('beforeupdate', () => {
-          if (rectangle.position.y > 800) {
-            this.matter.world.pause(); // Stop the physics simulation
-            lost = 1;
-            lostText = this.add.text(400, 400, 'LOST', {
-              font: '40px Arial',
-              fill: '#ff0000',
-            }).setOrigin(0.5); // Center the "lost" text
-
-            // Add "Return to Title" button
-            const returnButton = this.add.text(400, 600, 'RETURN TO TITLE', {
-              font: '30px Arial',
-              fill: '#ffffff',
-            }).setOrigin(0.5).setInteractive();
-
-            // Reload the page when the button is clicked
-            returnButton.on('pointerdown', () => {
-              location = location;
-            });
-
-          }
+        // Reload the page when the button is clicked
+        returnButton.on('pointerdown', () => {
+          location = location;
         });
-
+      }
+    });
   }
 
   
@@ -271,7 +253,7 @@ this.matter.world.on('beforeupdate', () => {
     type: Phaser.AUTO,
     width: 800, // Set canvas width to 800px
     height: 800, // Set canvas height to 800px
-    backgroundColor: 0x0A0963, // Set background color
+    backgroundColor: 0x000000, // Set background color
     physics: {
       default: 'matter',
       matter: {

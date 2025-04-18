@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>H.Y.N.A.Y.M</title>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Tillana:wght@400&display=swap" rel="stylesheet"> <!-- Add Tillana font -->
   <style>
     body { cursor: pointer; background: #000; }
   </style>
@@ -15,7 +16,6 @@
 let cursors;
     let objectCounter = 0; // Declare objectCounter as a global variable
     let counterText; // Text field to display the current falling item's number
-    let lostText; // Text to display "lost" message
     let lost = 0;
     let platform, platform2, platform3, platform4, platform5; // Declare all platforms globally
   
@@ -27,7 +27,7 @@ let cursors;
     }
 
     preload() {
-      this.load.image('cube', 'https://via.placeholder.com/50/FF0000/FFFFFF?text=+');
+      this.load.image('cube', './noodle.png');
       this.load.image('noodle', './noodle.png'); // Load the noodle image
       this.load.image('title', './title.png'); // Load the title screen background image
     }
@@ -35,6 +35,12 @@ let cursors;
     create() {
       // Set the title screen background
       this.add.image(400, 400, 'title').setOrigin(0.5); // Center the background image
+
+      // Display "SCORE: 0" at the beginning of the game
+      this.add.text(400, 400, '', {
+        font: '40px "Tillana"', // Use Tillana font
+        fill: '#ffffff',
+      }).setOrigin(0.5); // Center the text
 
       // Make clicking anywhere on the canvas start the game
       this.input.on('pointerdown', () => {
@@ -54,6 +60,7 @@ let cursors;
     preload() {
       //this.load.image('cube', 'https://via.placeholder.com/50/FF0000/FFFFFF?text=+');
       this.load.image('noodle', './noodle.png'); // Load the noodle image
+      this.load.image('lost', './lost.png'); // Load the lost screen image
     }
 
     create() {
@@ -61,8 +68,8 @@ let cursors;
          
  
      // Create the text field at the top of the screen
-     counterText = this.add.text(10, 10, 'SCORE: 0', {
-      font: '20px Arial',
+     counterText = this.add.text(10, 10, '', {
+      font: '40px "Tillana"', // Use Tillana font
       fill: '#ffffff',
     });
     
@@ -129,22 +136,7 @@ let cursors;
           if (circle.position.y > 800) {
             this.matter.world.pause(); // Stop the physics simulation
             lost = 1;
-            lostText = this.add.text(400, 400, 'LOST', {
-              font: '40px Arial',
-              fill: '#ff0000',
-            }).setOrigin(0.5); // Center the "lost" text
-          
-            // Add "Return to Title" button
-            const returnButton = this.add.text(400, 450, 'RETURN TO TITLE', {
-              font: '30px Arial',
-              fill: '#ffffff',
-            }).setOrigin(0.5).setInteractive();
-
-            // Reload the page when the button is clicked
-            returnButton.on('pointerdown', () => {
-              location = location;
-            });
-            
+            this.add.image(400, 400, 'lost').setOrigin(0.5).setScale(0.75); // Center the image and scale it
           }
         });
 
@@ -177,21 +169,7 @@ let cursors;
       if (rectangle.y > 800) {
         this.matter.world.pause(); // Stop the physics simulation
         lost = 1;
-        lostText = this.add.text(400, 400, 'LOST', {
-          font: '40px Arial',
-          fill: '#ff0000',
-        }).setOrigin(0.5); // Center the "lost" text
-
-        // Add "Return to Title" button
-        const returnButton = this.add.text(400, 450, 'RETURN TO TITLE', {
-          font: '30px Arial',
-          fill: '#ffffff',
-        }).setOrigin(0.5).setInteractive();
-
-        // Reload the page when the button is clicked
-        returnButton.on('pointerdown', () => {
-          location = location;
-        });
+        this.add.image(400, 400, 'lost').setOrigin(0.5).setScale(0.75); // Center the image and scale it
       }
     });
   }
@@ -199,6 +177,13 @@ let cursors;
   
       },
       loop: true,
+    });
+
+    // Make the entire canvas clickable when the player loses
+    this.input.on('pointerdown', () => {
+      if (lost == 1) {
+        location.reload(); // Reload the page
+      }
     });
   }
 

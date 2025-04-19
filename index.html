@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel=icon href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>🍜</text></svg>">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>H.Y.N.A.Y.M</title>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
@@ -26,273 +27,239 @@
 </head>
 <body>
   <script>
-
-let cursors;
+    let cursors;
     let objectCounter = 0; // Declare objectCounter as a global variable
     let counterText; // Text field to display the current falling item's number
     let lost = 0;
     let platform, platform2, platform3, platform4, platform5; // Declare all platforms globally
-  
 
-       // Title Scene
-  class TitleScene extends Phaser.Scene {
-    constructor() {
-      super({ key: 'TitleScene' });
+    // Title Scene
+    class TitleScene extends Phaser.Scene {
+      constructor() {
+        super({ key: 'TitleScene' });
+      }
+
+      preload() {
+        // Load assets for the title scene
+        this.load.image('cube', './noodle.png');
+        this.load.image('noodle', './noodle.png'); // Load the noodle image
+        this.load.image('title', './title.png'); // Load the title screen background image
+      }
+
+      create() {
+        // Set the title screen background
+        this.add.image(400, 400, 'title').setOrigin(0.5); // Center the background image
+
+        // Display "SCORE: 0" at the beginning of the game
+        this.add.text(400, 400, '', {
+          font: '40px "Tillana"', // Use Tillana font
+          fill: '#ffffff',
+        }).setOrigin(0.5); // Center the text
+
+        // Make clicking anywhere on the canvas start the game
+        this.input.on('pointerdown', () => {
+          this.scene.start('GameScene');
+        });
+      }
     }
 
-    preload() {
-      this.load.image('cube', './noodle.png');
-      this.load.image('noodle', './noodle.png'); // Load the noodle image
-      this.load.image('title', './title.png'); // Load the title screen background image
-    }
+    // Game Scene
+    class GameScene extends Phaser.Scene {
+      constructor() {
+        super({ key: 'GameScene' });
+      }
 
-    create() {
-      // Set the title screen background
-      this.add.image(400, 400, 'title').setOrigin(0.5); // Center the background image
+      preload() {
+        // Load assets for the game scene
+        this.load.image('noodle', './noodle.png'); // Load the noodle image
+        this.load.image('lost', './lost.png'); // Load the lost screen image
+        this.load.image('bowl', './bowl.png'); // Load the bowl image
+        this.load.audio('allaturca', './allaturca.mp3'); // Load the audio file
+      }
 
-      // Display "SCORE: 0" at the beginning of the game
-      this.add.text(400, 400, '', {
-        font: '40px "Tillana"', // Use Tillana font
-        fill: '#ffffff',
-      }).setOrigin(0.5); // Center the text
-
-      // Make clicking anywhere on the canvas start the game
-      this.input.on('pointerdown', () => {
-        this.scene.start('GameScene');
-      });
-    }
-  }
-
-  // Game Scene
-  class GameScene extends Phaser.Scene {
-    constructor() {
-      super({ key: 'GameScene' });
-    }
-
-
-
-    preload() {
-      //this.load.image('cube', 'https://via.placeholder.com/50/FF0000/FFFFFF?text=+');
-      this.load.image('noodle', './noodle.png'); // Load the noodle image
-      this.load.image('lost', './lost.png'); // Load the lost screen image
-      this.load.image('bowl', './bowl.png'); // Load the bowl image
-      this.load.audio('allaturca', './allaturca.mp3'); // Load the audio file
-    }
-
-    create() {
-
-         
- 
-     // Create the text field at the top of the screen
-     counterText = this.add.text(10, 10, '', {
-      font: '40px "Tillana"', // Use Tillana font
-      fill: '#ffffff',
-    });
-    
-    // Create the platform as a visible rectangle and link it to a physics body
-    platform = this.add.rectangle(400, 720, 320, 20, 0x000000); // Black rectangle
-    this.matter.add.gameObject(platform, {
-      isStatic: true,
-      friction: .5, // High friction to simulate dragging cubes
-    });
-
-    platform2 = this.add.rectangle(205, 695, 20, 100, 0x000000); // Black rectangle
-    this.matter.add.gameObject(platform2, {
-      angle: -45,
-      isStatic: true,
-      friction: .5, // High friction to simulate dragging cubes
-    });
-
-    platform3 = this.add.rectangle(595, 695, 20, 100, 0x000000); // Black rectangle
-    this.matter.add.gameObject(platform3, {
-      angle: 45,
-      isStatic: true,
-      friction: .5, // High friction to simulate dragging cubes
-    });
-
-    platform4 = this.add.rectangle(165, 625, 20, 100, 0x000000); // Black rectangle
-    this.matter.add.gameObject(platform4, {
-      isStatic: true,
-      friction: 1, // High friction to simulate dragging cubes
-    });
-
-    platform5 = this.add.rectangle(635, 625, 20, 100, 0x000000); // Black rectangle
-    this.matter.add.gameObject(platform5, {
-      isStatic: true,
-      friction: 1, // High friction to simulate dragging cubes
-    });
-
-    // Add input for arrow keys
-    cursors = this.input.keyboard.createCursorKeys(); // Ensure cursors is initialized here
-
-    // Play the background music when the game scene starts
-    const music = this.sound.add('allaturca', { loop: true }); // Add the audio and set it to loop
-    music.play(); // Play the audio in a loop
-
-    // Display instructions at the center of the screen after 500ms
-    this.time.delayedCall(500, () => {
-      const instructions = this.add.text(400, 400, 'move with arrow keys', {
-        font: '50px "Tillana"', // Bigger font size
-        fill: '#ffffff',
-      }).setOrigin(0.5); // Center the text
-
-      // Hide the instructions after 1 second
-      this.time.delayedCall(2000, () => {
-        instructions.setVisible(false);
-      });
-    });
-
-    // Spawn cubes every second
-    this.time.addEvent({
-      delay: 2000,
-      callback: () => {
-        if(lost == 1) {
-          return;
-        } 
-        
-
-  // Inside the callback function for spawning objects
-  const x = Phaser.Math.Between(50, 750);
-  objectCounter++; // Increment the counter
-  counterText.setText(`SCORE: ${objectCounter}`); // Update the text field
-
-  if (objectCounter % 5 === 0) {
-    // Create a blue circle every fifth object
-    const circle = this.matter.add.circle(x, 0, 25, {
-      friction: .5, // High friction for circles
-      frictionAir: 0.02, // Slight air resistance for realism
-      restitution: 0.9, // Bounce effect
-    });
-
-    // Check if the shape falls below the canvas
-    this.matter.world.on('beforeupdate', () => {
-          if (circle.position.y > 800) {
-            this.matter.world.pause(); // Stop the physics simulation
-            lost = 1;
-            this.add.image(400, 400, 'lost').setOrigin(0.5).setScale(0.75); // Center the image and scale it
-          }
+      create() {
+        // Create the text field at the top of the screen
+        counterText = this.add.text(10, 10, '', {
+          font: '40px "Tillana"', // Use Tillana font
+          fill: '#ffffff',
         });
 
+        // Create the platform as a visible rectangle and link it to a physics body
+        platform = this.add.rectangle(400, 720, 320, 20, 0x000000); // Black rectangle
+        this.matter.add.gameObject(platform, {
+          isStatic: true,
+          friction: 0.5, // High friction to simulate dragging cubes
+        });
 
-    // Add a visual representation of the circle
-    const graphics = this.add.graphics();
-    graphics.fillStyle(0xC2391E, 1); // orange color
-    graphics.fillCircle(0, 0, 25); // Draw circle centered at (0, 0)
-    graphics.setPosition(circle.position.x, circle.position.y);
-    circle.graphics = graphics;
+        platform2 = this.add.rectangle(205, 695, 20, 100, 0x000000); // Black rectangle
+        this.matter.add.gameObject(platform2, {
+          angle: -45,
+          isStatic: true,
+          friction: 0.5, // High friction to simulate dragging cubes
+        });
 
-    // Update the circle's visual position in the update loop
-    this.matter.world.on('beforeupdate', () => {
-      graphics.setPosition(circle.position.x, circle.position.y);
-    });
-  } else {
-    // Create a rectangle with noodle appearance
-    const rectangle = this.matter.add.image(x, -200, 'noodle', null, { // Spawn 200px higher
-      angle: Phaser.Math.DegToRad(Phaser.Math.Between(0, 360)), // Random angle
-      friction: 1, // High friction for rectangles
-      frictionAir: 0.02, // Slight air resistance for realism
-      restitution: 0.1, // Bounce effect
-    });
+        platform3 = this.add.rectangle(595, 695, 20, 100, 0x000000); // Black rectangle
+        this.matter.add.gameObject(platform3, {
+          angle: 45,
+          isStatic: true,
+          friction: 0.5, // High friction to simulate dragging cubes
+        });
 
-    rectangle.setScale(0.8); // Scale the noodle image to match the rectangle's dimensions
-    rectangle.setOrigin(0.5); // Center the image
+        platform4 = this.add.rectangle(165, 625, 20, 100, 0x000000); // Black rectangle
+        this.matter.add.gameObject(platform4, {
+          isStatic: true,
+          friction: 1, // High friction to simulate dragging cubes
+        });
 
-    // Check if the rectangle falls below the canvas
-    this.matter.world.on('beforeupdate', () => {
-      if (rectangle.y > 800) {
-        this.matter.world.pause(); // Stop the physics simulation
-        lost = 1;
-        this.add.image(400, 400, 'lost').setOrigin(0.5).setScale(0.75); // Center the image and scale it
+        platform5 = this.add.rectangle(635, 625, 20, 100, 0x000000); // Black rectangle
+        this.matter.add.gameObject(platform5, {
+          isStatic: true,
+          friction: 1, // High friction to simulate dragging cubes
+        });
+
+        // Add input for arrow keys
+        cursors = this.input.keyboard.createCursorKeys(); // Ensure cursors is initialized here
+
+        // Play the background music when the game scene starts
+        const music = this.sound.add('allaturca', { loop: true }); // Add the audio and set it to loop
+        music.play(); // Play the audio in a loop
+
+        // Display instructions at the center of the screen after 500ms
+        this.time.delayedCall(500, () => {
+          const instructions = this.add.text(400, 400, 'move with arrow keys', {
+            font: '50px "Tillana"', // Bigger font size
+            fill: '#ffffff',
+          }).setOrigin(0.5); // Center the text
+
+          // Hide the instructions after 1 second
+          this.time.delayedCall(2000, () => {
+            instructions.setVisible(false);
+          });
+        });
+
+        // Spawn cubes every second
+        this.time.addEvent({
+          delay: 2000,
+          callback: () => {
+            if (lost === 1) {
+              return;
+            }
+
+            // Inside the callback function for spawning objects
+            const x = Phaser.Math.Between(50, 750);
+            objectCounter++; // Increment the counter
+            counterText.setText(`SCORE: ${objectCounter}`); // Update the text field
+
+            if (objectCounter % 5 === 0) {
+              // Create a blue circle every fifth object
+              const circle = this.matter.add.circle(x, 0, 25, {
+                friction: 0.5, // High friction for circles
+                frictionAir: 0.02, // Slight air resistance for realism
+                restitution: 0.9, // Bounce effect
+              });
+
+              // Check if the shape falls below the canvas
+              this.matter.world.on('beforeupdate', () => {
+                if (circle.position.y > 800) {
+                  this.matter.world.pause(); // Stop the physics simulation
+                  lost = 1;
+                  this.add.image(400, 400, 'lost').setOrigin(0.5).setScale(0.75); // Center the image and scale it
+                }
+              });
+
+              // Add a visual representation of the circle
+              const graphics = this.add.graphics();
+              graphics.fillStyle(0xC2391E, 1); // orange color
+              graphics.fillCircle(0, 0, 25); // Draw circle centered at (0, 0)
+              graphics.setPosition(circle.position.x, circle.position.y);
+              circle.graphics = graphics;
+
+              // Update the circle's visual position in the update loop
+              this.matter.world.on('beforeupdate', () => {
+                graphics.setPosition(circle.position.x, circle.position.y);
+              });
+            } else {
+              // Create a rectangle with noodle appearance
+              const rectangle = this.matter.add.image(x, -200, 'noodle', null, {
+                angle: Phaser.Math.DegToRad(Phaser.Math.Between(0, 360)), // Random angle
+                friction: 1, // High friction for rectangles
+                frictionAir: 0.02, // Slight air resistance for realism
+                restitution: 0.1, // Bounce effect
+              });
+
+              rectangle.setScale(0.8); // Scale the noodle image to match the rectangle's dimensions
+              rectangle.setOrigin(0.5); // Center the image
+
+              // Check if the rectangle falls below the canvas
+              this.matter.world.on('beforeupdate', () => {
+                if (rectangle.y > 800) {
+                  this.matter.world.pause(); // Stop the physics simulation
+                  lost = 1;
+                  this.add.image(400, 400, 'lost').setOrigin(0.5).setScale(0.75); // Center the image and scale it
+                }
+              });
+            }
+          },
+          loop: true,
+        });
+
+        // Display the bowl image at the very bottom of the screen, ensuring it is drawn on top
+        this.bowl = this.add.image(400, 790, 'bowl').setOrigin(0.5, 1).setDepth(1); // Align the bottom of the image with the screen and set depth
+
+        // Make the entire canvas clickable when the player loses
+        this.input.on('pointerdown', () => {
+          if (lost === 1) {
+            location.reload(); // Reload the page
+          }
+        });
       }
-    });
-  }
 
-  
-      },
-      loop: true,
-    });
+      update() {
+        if (lost === 1) {
+          return;
+        }
 
-    // Display the bowl image at the very bottom of the screen, ensuring it is drawn on top
-    this.bowl = this.add.image(400, 790, 'bowl').setOrigin(0.5, 1).setDepth(1); // Align the bottom of the image with the screen and set depth
+        if (cursors.left.isDown) {
+          platform.setVelocityX(-5); // Move platform left
+          platform.x += -5; // Update the visual x position
+          platform2.x += -5;
+          platform3.x += -5;
+          platform4.x += -5;
+          platform5.x += -5;
 
-    // Make the entire canvas clickable when the player loses
-    this.input.on('pointerdown', () => {
-      if (lost == 1) {
-        location.reload(); // Reload the page
+          // Move the bowl left
+          this.bowl.x -= 5;
+        } else if (cursors.right.isDown) {
+          platform.setVelocityX(5); // Move platform right
+          platform.x += 5; // Update the visual x position
+          platform2.x += 5;
+          platform3.x += 5;
+          platform4.x += 5;
+          platform5.x += 5;
+
+          // Move the bowl right
+          this.bowl.x += 5;
+        } else {
+          platform.setVelocityX(0); // Stop platform when no key is pressed
+        }
       }
-    });
-  }
-
-  update() {
-    if (lost == 1) {return }
-
-    if (cursors.left.isDown) {
-      platform.setVelocityX(-5); // Move platform left
-      platform.x += -5; // Update the visual x position
-  
-      platform2.setVelocityX(-5); // Move platform left
-      platform2.x += -5;
-
-      platform3.setVelocityX(-5); // Move platform left
-      platform3.x += -5;
-
-      platform4.setVelocityX(-5); // Move platform left
-      platform4.x += -5;
-
-      platform5.setVelocityX(-5); // Move platform left
-      platform5.x += -5;
-
-      // Move the bowl left
-      this.bowl.x -= 5;
-    
-    } else if (cursors.right.isDown) {
-      platform.setVelocityX(5); // Move platform right
-      platform.x += 5; // Update the visual x position
-    
-      platform2.setVelocityX(5); // Move platform right
-      platform2.x += 5;
-
-      platform3.setVelocityX(5); // Move platform right
-      platform3.x += 5;
-
-      platform4.setVelocityX(5); // Move platform right
-      platform4.x += 5;
-
-      platform5.setVelocityX(5); // Move platform right
-      platform5.x += 5;
-
-      // Move the bowl right
-      this.bowl.x += 5;
-
-    } else {
-      platform.setVelocityX(0); // Stop platform when no key is pressed
-      platform2.setVelocityX(0); // Stop platform when no key is pressed
-
-      platform3.setVelocityX(0); // Stop platform when no key is pressed
-      platform4.setVelocityX(0); // Stop platform when no key is pressed
-      platform5.setVelocityX(0); // Stop platform when no key is pressed
-
     }
-  }
-}
 
     const config = {
-    type: Phaser.AUTO,
-    width: 800, // Set canvas width to 800px
-    height: 800, // Set canvas height to 800px
-    backgroundColor: 0x000000, // Set background color
-    physics: {
-      default: 'matter',
-      matter: {
-        debug: false,
+      type: Phaser.AUTO,
+      width: 800, // Set canvas width to 800px
+      height: 800, // Set canvas height to 800px
+      backgroundColor: 0x000000, // Set background color
+      physics: {
+        default: 'matter',
+        matter: {
+          debug: false,
+        },
       },
-    },
-    scene: [TitleScene, GameScene],
-  };
+      scene: [TitleScene, GameScene],
+    };
 
     const game = new Phaser.Game(config);
-
- 
   </script>
 </body>
 </html>

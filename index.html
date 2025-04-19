@@ -7,7 +7,21 @@
   <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Tillana:wght@400&display=swap" rel="stylesheet"> <!-- Add Tillana font -->
   <style>
-    body { cursor: pointer; background: #000; }
+    body {
+      cursor: pointer;
+      background: radial-gradient(#222, #000);
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh; /* Full viewport height */
+      overflow: hidden; /* Prevent scrollbars */
+    }
+
+    canvas {
+      width: 100vmin; /* Fill the smaller dimension of the viewport */
+      height: 100vmin; /* Maintain square shape */
+    }
   </style>
 </head>
 <body>
@@ -61,6 +75,8 @@ let cursors;
       //this.load.image('cube', 'https://via.placeholder.com/50/FF0000/FFFFFF?text=+');
       this.load.image('noodle', './noodle.png'); // Load the noodle image
       this.load.image('lost', './lost.png'); // Load the lost screen image
+      this.load.image('bowl', './bowl.png'); // Load the bowl image
+      this.load.audio('allaturca', './allaturca.mp3'); // Load the audio file
     }
 
     create() {
@@ -74,40 +90,57 @@ let cursors;
     });
     
     // Create the platform as a visible rectangle and link it to a physics body
-    platform = this.add.rectangle(400, 750, 320, 20, 0xff0000); // Visible red rectangle
+    platform = this.add.rectangle(400, 720, 320, 20, 0x000000); // Black rectangle
     this.matter.add.gameObject(platform, {
       isStatic: true,
       friction: .5, // High friction to simulate dragging cubes
     });
 
-    platform2 = this.add.rectangle(205, 725, 20, 100, 0xff0000); // Visible red rectangle
+    platform2 = this.add.rectangle(205, 695, 20, 100, 0x000000); // Black rectangle
     this.matter.add.gameObject(platform2, {
       angle: -45,
       isStatic: true,
       friction: .5, // High friction to simulate dragging cubes
     });
 
-    platform3 = this.add.rectangle(595, 725, 20, 100, 0xff0000); // Visible red rectangle
+    platform3 = this.add.rectangle(595, 695, 20, 100, 0x000000); // Black rectangle
     this.matter.add.gameObject(platform3, {
       angle: 45,
       isStatic: true,
       friction: .5, // High friction to simulate dragging cubes
     });
 
-    platform4 = this.add.rectangle(165, 655, 20, 100, 0xff0000); // Visible red rectangle
+    platform4 = this.add.rectangle(165, 625, 20, 100, 0x000000); // Black rectangle
     this.matter.add.gameObject(platform4, {
       isStatic: true,
       friction: 1, // High friction to simulate dragging cubes
     });
 
-    platform5 = this.add.rectangle(635, 655, 20, 100, 0xff0000); // Visible red rectangle
+    platform5 = this.add.rectangle(635, 625, 20, 100, 0x000000); // Black rectangle
     this.matter.add.gameObject(platform5, {
       isStatic: true,
       friction: 1, // High friction to simulate dragging cubes
     });
 
     // Add input for arrow keys
-    cursors = this.input.keyboard.createCursorKeys();
+    cursors = this.input.keyboard.createCursorKeys(); // Ensure cursors is initialized here
+
+    // Play the background music when the game scene starts
+    const music = this.sound.add('allaturca', { loop: true }); // Add the audio and set it to loop
+    music.play(); // Play the audio in a loop
+
+    // Display instructions at the center of the screen after 500ms
+    this.time.delayedCall(500, () => {
+      const instructions = this.add.text(400, 400, 'move with arrow keys', {
+        font: '50px "Tillana"', // Bigger font size
+        fill: '#ffffff',
+      }).setOrigin(0.5); // Center the text
+
+      // Hide the instructions after 1 second
+      this.time.delayedCall(2000, () => {
+        instructions.setVisible(false);
+      });
+    });
 
     // Spawn cubes every second
     this.time.addEvent({
@@ -179,6 +212,9 @@ let cursors;
       loop: true,
     });
 
+    // Display the bowl image at the very bottom of the screen, ensuring it is drawn on top
+    this.bowl = this.add.image(400, 790, 'bowl').setOrigin(0.5, 1).setDepth(1); // Align the bottom of the image with the screen and set depth
+
     // Make the entire canvas clickable when the player loses
     this.input.on('pointerdown', () => {
       if (lost == 1) {
@@ -205,6 +241,9 @@ let cursors;
 
       platform5.setVelocityX(-5); // Move platform left
       platform5.x += -5;
+
+      // Move the bowl left
+      this.bowl.x -= 5;
     
     } else if (cursors.right.isDown) {
       platform.setVelocityX(5); // Move platform right
@@ -221,6 +260,9 @@ let cursors;
 
       platform5.setVelocityX(5); // Move platform right
       platform5.x += 5;
+
+      // Move the bowl right
+      this.bowl.x += 5;
 
     } else {
       platform.setVelocityX(0); // Stop platform when no key is pressed

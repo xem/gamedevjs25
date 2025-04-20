@@ -74,10 +74,17 @@
         this.load.image('noodle', './noodle.png'); // Load the noodle image
         this.load.image('lost', './lost.png'); // Load the lost screen image
         this.load.image('bowl', './bowl.png'); // Load the bowl image
+        this.load.image('bowl2', './bowl2.png'); // Load the second bowl image
         this.load.audio('allaturca', './allaturca.mp3'); // Load the audio file
       }
 
       create() {
+
+                
+        // Display the second bowl image at the very bottom of the screen, ensuring it is drawn behind the falling pieces
+        this.bowl2 = this.add.image(400, 805, 'bowl2').setOrigin(0.5, 1); // Align the bottom of the second image with the screen and set depth lower than falling pieces
+
+        
         // Create the text field at the top of the screen
         counterText = this.add.text(10, 10, '', {
           font: '40px "Tillana"', // Use Tillana font
@@ -85,33 +92,33 @@
         });
 
         // Create the platform as a visible rectangle and link it to a physics body
-        platform = this.add.rectangle(400, 720, 320, 20, 0x000000); // Black rectangle
+        platform = this.add.rectangle(400, 720, 320, 20, 0x000000).setDepth(-2); // Black rectangle
         this.matter.add.gameObject(platform, {
           isStatic: true,
           friction: 0.5, // High friction to simulate dragging cubes
         });
 
-        platform2 = this.add.rectangle(205, 695, 20, 100, 0x000000); // Black rectangle
+        platform2 = this.add.rectangle(205, 695, 20, 100, 0x000000).setDepth(-2); // Black rectangle
         this.matter.add.gameObject(platform2, {
           angle: -45,
           isStatic: true,
           friction: 0.5, // High friction to simulate dragging cubes
         });
 
-        platform3 = this.add.rectangle(595, 695, 20, 100, 0x000000); // Black rectangle
+        platform3 = this.add.rectangle(595, 695, 20, 100, 0x000000).setDepth(-2); // Black rectangle
         this.matter.add.gameObject(platform3, {
           angle: 45,
           isStatic: true,
           friction: 0.5, // High friction to simulate dragging cubes
         });
 
-        platform4 = this.add.rectangle(165, 625, 20, 100, 0x000000); // Black rectangle
+        platform4 = this.add.rectangle(165, 625, 20, 100, 0x000000).setDepth(-2); // Black rectangle
         this.matter.add.gameObject(platform4, {
           isStatic: true,
           friction: 1, // High friction to simulate dragging cubes
         });
 
-        platform5 = this.add.rectangle(635, 625, 20, 100, 0x000000); // Black rectangle
+        platform5 = this.add.rectangle(635, 625, 20, 100, 0x000000).setDepth(-2); // Black rectangle
         this.matter.add.gameObject(platform5, {
           isStatic: true,
           friction: 1, // High friction to simulate dragging cubes
@@ -123,6 +130,7 @@
         // Play the background music when the game scene starts
         const music = this.sound.add('allaturca', { loop: true }); // Add the audio and set it to loop
         music.play(); // Play the audio in a loop
+
 
         // Display instructions at the center of the screen after 500ms
         this.time.delayedCall(500, () => {
@@ -185,6 +193,7 @@
                 friction: 1, // High friction for rectangles
                 frictionAir: 0.02, // Slight air resistance for realism
                 restitution: 0.1, // Bounce effect
+                density: 0.005, // Add weight to the noodles
               });
 
               rectangle.setScale(0.8); // Scale the noodle image to match the rectangle's dimensions
@@ -203,7 +212,7 @@
           loop: true,
         });
 
-        // Display the bowl image at the very bottom of the screen, ensuring it is drawn on top
+        // Display the bowl images at the very bottom of the screen, ensuring they are drawn on top
         this.bowl = this.add.image(400, 805, 'bowl').setOrigin(0.5, 1).setDepth(1); // Align the bottom of the image with the screen and set depth
 
         // Make the entire canvas clickable when the player loses
@@ -227,8 +236,9 @@
           platform4.x += -5;
           platform5.x += -5;
 
-          // Move the bowl left
+          // Move the bowls left
           this.bowl.x -= 5;
+          this.bowl2.x -= 5;
         } else if (cursors.right.isDown) {
           platform.setVelocityX(5); // Move platform right
           platform.x += 5; // Update the visual x position
@@ -237,8 +247,9 @@
           platform4.x += 5;
           platform5.x += 5;
 
-          // Move the bowl right
+          // Move the bowls right
           this.bowl.x += 5;
+          this.bowl2.x += 5;
         } else {
           platform.setVelocityX(0); // Stop platform when no key is pressed
         }

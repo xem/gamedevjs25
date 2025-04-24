@@ -1,14 +1,32 @@
 <!doctype html>
 <meta charset=utf-8>
 <body id=b>
+<style>
+body {
+  cursor: pointer;
+  background: radial-gradient(#222, #000);
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  overflow: hidden; /* Prevent scrollbars */
+}
+
+canvas {
+  width: 100vmin; /* Fill the smaller dimension of the viewport */
+  height: 100vmin; /* Maintain square shape */
+}
+</style>
 <canvas id=a width=640 height=640>
 <script>
+
+// Globals
 d = document;
 g = a.getContext('webgl');
-
-
 up = down = left = right = 0, backward = 1, forward = 0;
 
+// Fragment shader
 shader = `
 // Mandelbox distance function
 float map(vec3 pos) {
@@ -43,7 +61,7 @@ void mainImage(out vec4 o,vec2 c){
   vec3 p = vec3(iCam.x, iCam.y, -15. + iCam.z);
   
   // Iterations
-  const float it = 2999.;
+  const float it = 999.;
   
   // Default color (orange)
   vec3 col = vec3(.7+(gl_FragCoord.y-600.)/10000.,.35+(gl_FragCoord.y-600.)/10000.,0);
@@ -71,13 +89,13 @@ void mainImage(out vec4 o,vec2 c){
   }
 
   // Color the pixel
-  
   o.rgb = col;
   if (gl_FragCoord.x < 1. && gl_FragCoord.y < 1.) {
 	o.r = map(iCam.xyz - vec3(0,0,15));
   }
 }`
 
+// WebGL setup
 {
   (
     e => {
